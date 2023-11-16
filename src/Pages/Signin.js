@@ -22,7 +22,7 @@ function Signin() {
       createUserWithEmailAndPassword(Auth, email, password)
         .then((userCredential) => {
           alert("註冊成功");
-          setActiveIrem("sigin");
+          setActiveIrem("/React/sigin");
         })
         .catch((error) => {
           seterr(error.code);
@@ -30,7 +30,7 @@ function Signin() {
     } else {
       signInWithEmailAndPassword(Auth, email, password)
         .then((userCredential) => {
-            navigate("/");
+            navigate("/React");
         })
         .catch((error) => {
           seterr(error.code);
@@ -40,6 +40,7 @@ function Signin() {
   }
   function SingWithGoogle() {
     signInWithPopup(Auth, provider);
+    navigate("/React");
   }
   return (
     <Container>

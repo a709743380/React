@@ -11,10 +11,11 @@ function App() {
             {/* Header固定 */}
             <Header />
             <Routes>
-                <Route path="/Posts"   element={<Posts />} />
-                <Route path="/Signin" element={<Signin />} />
-                <Route path="/new_posts" element={<Newposts />} />
-                <Route path="/ViewPost/:paramId" element={<ViewPost />} />
+                <Route path="/React"   element={<Posts />} />
+                <Route path="/React/Posts"   element={<Posts />} />
+                <Route path="/React/Signin" element={<Signin />} />
+                <Route path="/React/new_posts" element={<Newposts />} />
+                <Route path="/React/ViewPost/:paramId" element={<ViewPost />} />
             </Routes>
         </BrowserRouter>
     );
