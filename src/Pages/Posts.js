@@ -10,7 +10,7 @@ function Posts() {
   React.useEffect(() => {
     const getposts = async () => {
       const postDatas = await getDocs(db_posts);
-      const ListPosts = postDatas.docs.map((Data) => {
+      const ListPosts = postDatas.docs.filter((x)=>(x.data()?.Isdelete ?? false) === false).map((Data) => {
         const id = Data.id;
         return { ...Data.data(), id };
       });
