@@ -35,7 +35,7 @@ function Posts() {
                   <Item
                     key={postItemData.id}
                     as={Link}
-                    to={`/ViewPost/${postItemData.id}`}
+                    to={`/React/ViewPost/${postItemData.id}`}
                   >
                     <Item.Image
                       src={postItemData?.ImgUrl || "../../Image/unfind.png"}

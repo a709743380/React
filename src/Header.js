@@ -17,7 +17,7 @@ function Header() {
         signOut(Auth);
     }
     return (<Menu>
-        <Menu.Item as={Link} to="/Posts">MyFirst</Menu.Item>
+        <Menu.Item as={Link} to="/React/Posts">MyFirst</Menu.Item>
         <Menu.Item>
             <Search></Search>
         </Menu.Item>
@@ -25,13 +25,13 @@ function Header() {
             {user ?
                 (
                     <>
-                        <Menu.Item as={Link} to="/new_posts">
+                        <Menu.Item as={Link} to="/React/new_posts">
                             發佈文章
                         </Menu.Item>
-                        <Menu.Item as={Link} to="/personalInfo">
+                        <Menu.Item as={Link} to="/React/personalInfo">
                             會員資料
                         </Menu.Item>
-                        <Menu.Item as={Link} to="/Signin"onClick={()=>handleSignOut()} >
+                        <Menu.Item as={Link} to="/React/Signin"onClick={()=>handleSignOut()} >
                             登出
                         </Menu.Item>
                     </>
