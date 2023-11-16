@@ -60,7 +60,9 @@ function ViewPost() {
   }, []);
 
   function toggle(isActive, theIcon) {
-    if (isNaN(Auth?.currentUser?.uid) || Auth?.currentUser?.uid === "") {
+    console.log(isNaN(Auth?.currentUser?.uid))
+    console.log(Auth?.currentUser.uid)
+    if (Auth?.currentUser?.uid===null || Auth?.currentUser?.uid === "") {
       alert("請先登錄");
       return false;
     }
@@ -135,7 +137,7 @@ function ViewPost() {
               />
               <Segment>{postData.content}</Segment>
               <Segment basic vertical>
-                留言 (0) 讚 {postData.liked?.length || 0} ·
+                留言 ({postData.commentCount || 0}) 讚 {postData.liked?.length || 0} ·
                 <Icon
                   name={`thumbs up${isLiked ? "" : " outline"}`}
                   color={isLiked ? "blue" : "grey"}
