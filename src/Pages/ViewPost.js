@@ -114,11 +114,9 @@ function ViewPost() {
     const deleteData = {
       "Isdelete": true
     };
-    const resSet = setDoc(deleteRef, deleteData, { merge: true })
+    const deleteresSet = setDoc(deleteRef, deleteData, { merge: true })
       .then(() => {
-
         navigate("/React");
-
       })
       .catch((error) => {
         console.error("Error updating document: ", error);
@@ -167,12 +165,13 @@ function ViewPost() {
                   link
                   onClick={() => toggle(isBook, "bookmark")}
                 ></Icon>
-                <Icon
+                {postData.author.uid !== Auth.currentUser.uid ? "":<Icon
                   name="delete"
                   color="red"
                   link
                   onClick={() => Delete()}
                 ></Icon>
+}
               </Segment>
               <Comment.Group>
                 <Form>
