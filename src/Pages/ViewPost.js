@@ -12,7 +12,6 @@ function ViewPost() {
     });
     React.useEffect(() => {
 
-        // 获取对特定文档的引用
         const documentRef = doc(db, "posts", paramId);
         onSnapshot(documentRef, (docSnapshot) => {
             if (docSnapshot.exists()) {
@@ -23,7 +22,7 @@ function ViewPost() {
 
     const isBook = postData.bookmark?.includes(Auth.currentUser.uid);
     const isLiked = postData.liked?.includes(Auth.currentUser.uid);
-
+console.log(isLiked)
     function toggle(isActive,theIcon) {
 
         const updateRef = doc(db, "posts", paramId);
@@ -62,19 +61,18 @@ function ViewPost() {
                             <Item.Image src={postData.ImgUrl || "../../Image/unfind.png"} />
                             <Segment basic vertical>{postData.content}</Segment>
                             <Item.Extra>
-                                留言  讚 {postData.bookmark?.length || 0}  ·
-                                <Icon name="thumbs up" color="grey"></Icon>
+                                留言 (0) 讚 {postData.liked?.length || 0}  ·
                                 <Icon
-                                    name={`humbs up${isLiked ? '' : ' outline'}`}
+                                    name={`thumbs up${isLiked ? '' : ' outline'}`}
                                     color={isLiked ? 'blue' : 'grey'}
                                     link
-                                    onClick={toggle(isLiked,liked)}
+                                    onClick={()=>toggle(isLiked,"liked")}
                                 ></Icon>
                                 <Icon
                                     name={`bookmark${isBook ? '' : ' outline'}`}
                                     color={isBook ? 'blue' : 'grey'}
                                     link
-                                    onClick={toggle(isBook,bookmark)}
+                                    onClick={()=>toggle(isBook,"bookmark")}
                                 ></Icon>
 
                             </Item.Extra>
