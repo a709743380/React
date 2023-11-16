@@ -17,7 +17,7 @@ function Header() {
         signOut(Auth);
     }
     return (<Menu>
-        <Menu.Item as={Link} to="/">MyFirst</Menu.Item>
+        <Menu.Item as={Link} to="/Posts">MyFirst</Menu.Item>
         <Menu.Item>
             <Search></Search>
         </Menu.Item>
@@ -31,7 +31,7 @@ function Header() {
                         <Menu.Item as={Link} to="/personalInfo">
                             會員資料
                         </Menu.Item>
-                        <Menu.Item as={Link} to="/Signin"onClick={handleSignOut} >
+                        <Menu.Item as={Link} to="/Signin"onClick={()=>handleSignOut()} >
                             登出
                         </Menu.Item>
                     </>

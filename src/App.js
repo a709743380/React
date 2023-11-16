@@ -11,7 +11,7 @@ function App() {
             {/* Header固定 */}
             <Header />
             <Routes>
-                <Route path="/"   element={<Posts />} />
+                <Route path="/Posts"   element={<Posts />} />
                 <Route path="/Signin" element={<Signin />} />
                 <Route path="/new_posts" element={<Newposts />} />
                 <Route path="/ViewPost/:paramId" element={<ViewPost />} />
