@@ -21,6 +21,8 @@ import {
   writeBatch,
   Timestamp,
   collection,
+  query,
+  orderBy,
 } from "firebase/firestore";
 import { db, Auth } from "../utils/firebase";
 
@@ -31,6 +33,8 @@ function ViewPost() {
   const [postData, setPostData] = React.useState({
     author: {},
   });
+  const [commentsData, setComments] = React.useState([]);
+
   const isBook = postData.bookmark?.includes(Auth?.currentUser?.uid);
   const isLiked = postData.liked?.includes(Auth?.currentUser?.uid);
 
@@ -40,6 +44,18 @@ function ViewPost() {
       if (docSnapshot.exists()) {
         setPostData(docSnapshot.data());
       }
+    });
+  }, []);
+
+  React.useEffect(() => {
+    const postsRef = doc(db, "posts", paramId);
+    const commentsRef = collection(postsRef, "comments");
+    const commentsQuery = query(commentsRef, orderBy("createAt", "desc"));
+    onSnapshot(commentsQuery, (snapshot) => {
+      const qData = snapshot.docs.map((doc) => {
+        return doc.data();
+      });
+      setComments(qData);
     });
   }, []);
 
@@ -81,12 +97,10 @@ function ViewPost() {
     };
 
     const postsresSet = batch.update(postsRef, commentCount);
-    const commentsRef = co(postsRef, "comments") ;
+    const commentsRef = collection(postsRef, "comments");
     const newDocRef1 = doc(commentsRef);
-    console.log(123);
-    batch.set(commentsRef, commentData);
+    batch.set(newDocRef1, commentData);
 
-    console.log("Commit");
     batch.commit().then(() => {
       setComment("");
       setLoading(false);
@@ -153,16 +167,20 @@ function ViewPost() {
                     留言
                   </Form.Button>
                 </Form>
-                <Header>共留言{"N"}則</Header>
-
-                <Comment.Avatar src="" />
-                <Comment>
-                  <Comment.Author as="span">{"留言人"}</Comment.Author>
-                  <Comment.Metadata>
-                    {new Date().toLocaleDateString()}
-                  </Comment.Metadata>
-                  <Comment.Text>{"留言內容"}</Comment.Text>
-                </Comment>
+                <Header>共留言{postData.commentCount || 0}則</Header>
+                {commentsData.map((commentItme) => {
+                  return(
+                  <Comment>
+                    <Comment.Avatar src={commentItme.author?.photoUrl || ""} />
+                    <Comment.Author as="span">
+                      {commentItme.author?.displayName || "使用者"}
+                    </Comment.Author>
+                    <Comment.Metadata>
+                      {commentItme.createAt?.toDate().toLocaleDateString()}
+                    </Comment.Metadata>
+                    <Comment.Text>{commentItme.comment}</Comment.Text>
+                  </Comment>)
+                })}
               </Comment.Group>
             </Item>
           </Grid.Column>
