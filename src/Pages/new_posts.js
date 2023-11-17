@@ -83,6 +83,7 @@ function new_posts() {
       ImgUrl: "",
     };
     addRef();
+    navigate("/React/Posts");
     setIsLoadding(false);
   }
 

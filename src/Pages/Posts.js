@@ -1,5 +1,4 @@
-import { Container, Grid, Icon, Item } from "semantic-ui-react";
-import Topics from "../Topics";
+import {  Icon, Item } from "semantic-ui-react";
 import React from "react";
 import { getDocs } from "firebase/firestore";
 import { db_posts } from "../utils/firebase";
@@ -14,7 +13,6 @@ function Posts() {
         const id = Data.id;
         return { ...Data.data(), id };
       });
-      console.log(ListPosts);
       setColPost(ListPosts);
     };
 
@@ -22,13 +20,6 @@ function Posts() {
   }, []);
 
   return (
-    <Container>
-      <Grid>
-        <Grid.Row>
-          <Grid.Column width="3">
-            <Topics />
-          </Grid.Column>
-          <Grid.Column width="10">
             <Item.Group>
               {colPost.map((postItemData) => {
                 return (
@@ -59,17 +50,12 @@ function Posts() {
                       <Item.Description>
                         {postItemData?.content}
                       </Item.Description>
-                      <Item.Extra>留言 0 讚 0 </Item.Extra>
+                      <Item.Extra>留言 {postItemData?.commentCount || 0} 讚 {postItemData.liked?.length || 0} </Item.Extra>
                     </Item.Content>
                   </Item>
                 );
               })}
             </Item.Group>
-          </Grid.Column>
-          <Grid.Column width="3">空白</Grid.Column>
-        </Grid.Row>
-      </Grid>
-    </Container>
   );
 }
 

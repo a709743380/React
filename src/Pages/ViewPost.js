@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams,useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
   Grid,
@@ -22,9 +22,10 @@ import {
   Timestamp,
   collection,
   query,
-  orderBy
+  orderBy,
 } from "firebase/firestore";
 import { db, Auth } from "../utils/firebase";
+import { FacebookAuthProvider } from "firebase/auth";
 
 function ViewPost() {
   const { paramId } = useParams();
@@ -34,7 +35,7 @@ function ViewPost() {
     author: {},
   });
   const [commentsData, setComments] = React.useState([]);
-  const navigate = new useNavigate
+  const navigate = new useNavigate();
   const isBook = postData.bookmark?.includes(Auth?.currentUser?.uid);
   const isLiked = postData.liked?.includes(Auth?.currentUser?.uid);
 
@@ -60,8 +61,7 @@ function ViewPost() {
   }, []);
 
   function toggle(isActive, theIcon) {
-    console.log(isNaN(Auth?.currentUser?.uid));
-    console.log(Auth?.currentUser.uid);
+
     if (Auth?.currentUser?.uid === null || Auth?.currentUser?.uid === "") {
       alert("請先登錄");
       return false;
@@ -81,6 +81,11 @@ function ViewPost() {
 
   function addComment() {
     setLoading(true);
+    if(commentContent ===""){
+      alert("請輸入留言");
+      setLoading(false);
+      return false;
+    }
     const batch = writeBatch(db);
     const postsRef = doc(db, "posts", paramId);
     const commentCount = {
@@ -91,9 +96,9 @@ function ViewPost() {
       comment: commentContent,
       createAt: Timestamp.now(),
       author: {
-        uid: Auth?.currentUser?.uid || "",
-        displayName: Auth?.currentUser?.displayName || "",
-        photoUrl: Auth?.currentUser?.photoUrl || "",
+        uid: Auth.currentUser?.uid || "",
+        displayName: Auth.currentUser?.displayName || "",
+        photoUrl: Auth.currentUser?.photoUrl || "",
       },
     };
 
@@ -109,10 +114,9 @@ function ViewPost() {
   }
 
   function Delete() {
-
     const deleteRef = doc(db, "posts", paramId);
     const deleteData = {
-      "Isdelete": true
+      Isdelete: true,
     };
     const deleteresSet = setDoc(deleteRef, deleteData, { merge: true })
       .then(() => {
@@ -121,98 +125,82 @@ function ViewPost() {
       .catch((error) => {
         console.error("Error updating document: ", error);
       });
-      
   }
   return (
-    <Container>
-      <Grid>
-        <Grid.Row>
-          <Grid.Column width="5"> </Grid.Column>
-          <Grid.Column width="10">
-            <Item>
-              <Item.Meta>
-                {postData.author?.photoUrl ? (
-                  <Image size={"small"} src={postData.author.photoUrl}></Image>
-                ) : (
-                  <Icon name="user circle"></Icon>
-                )}
-                {postData.author?.displayName || "使用者"}
-              </Item.Meta>
-              <Header>
-                {postData.title}
-                <Header.Subheader>
-                  {postData.topic} ·{" "}
-                  {postData.createAt?.toDate().toLocaleDateString()}
-                </Header.Subheader>
-              </Header>
-              <Item.Image
-                size={"huge"}
-                src={postData.ImgUrl || "../../Image/unfind.png"}
-              />
-              <Segment>{postData.content}</Segment>
-              <Segment basic vertical>
-                留言 ({postData.commentCount || 0})· 讚
-                {postData.liked?.length || 0} ·
-                <Icon
-                  name={`thumbs up${isLiked ? "" : " outline"}`}
-                  color={isLiked ? "blue" : "grey"}
-                  link
-                  onClick={() => toggle(isLiked, "liked")}
-                ></Icon>
-                <Icon
-                  name={`bookmark${isBook ? "" : " outline"}`}
-                  color={isBook ? "blue" : "grey"}
-                  link
-                  onClick={() => toggle(isBook, "bookmark")}
-                ></Icon>
-                {postData.author.uid !== Auth.currentUser.uid ? "":<Icon
-                  name="delete"
-                  color="red"
-                  link
-                  onClick={() => Delete()}
-                ></Icon>
-}
-              </Segment>
-              <Comment.Group>
-                <Form>
-                  <Form.TextArea
-                    value={commentContent}
-                    onChange={(e) => {
-                      setComment(e.target.value);
-                    }}
-                  ></Form.TextArea>
-                  <Form.Button
-                    loading={Loading}
-                    onClick={() => {
-                      addComment();
-                    }}
-                  >
-                    留言
-                  </Form.Button>
-                </Form>
-                <Header>共留言{postData.commentCount || 0}則</Header>
-                {commentsData.map((commentItme) => {
-                  return (
-                    <Comment>
-                      <Comment.Avatar
-                        src={commentItme.author?.photoUrl || ""}
-                      />
-                      <Comment.Author as="span">
-                        {commentItme.author?.displayName || "使用者"}
-                      </Comment.Author>
-                      <Comment.Metadata>
-                        {commentItme.createAt?.toDate().toLocaleDateString()}
-                      </Comment.Metadata>
-                      <Comment.Text>{commentItme.comment}</Comment.Text>
-                    </Comment>
-                  );
-                })}
-              </Comment.Group>
-            </Item>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
-    </Container>
+    <Item>
+      <Item.Meta>
+        {postData.author?.photoUrl ? (
+          <Image size={"small"} src={postData.author.photoUrl}></Image>
+        ) : (
+          <Icon name="user circle"></Icon>
+        )}
+        {postData.author?.displayName || "使用者"}
+      </Item.Meta>
+      <Header>
+        {postData.title}
+        <Header.Subheader>
+          {postData.topic} · {postData.createAt?.toDate().toLocaleDateString()}
+        </Header.Subheader>
+      </Header>
+      <Item.Image
+        size={"huge"}
+        src={postData.ImgUrl || "../../Image/unfind.png"}
+      />
+      <Segment>{postData.content}</Segment>
+      <Segment basic vertical>
+        留言 ({postData.commentCount || 0})· 讚{postData.liked?.length || 0} ·
+        <Icon
+          name={`thumbs up${isLiked ? "" : " outline"}`}
+          color={isLiked ? "blue" : "grey"}
+          link
+          onClick={() => toggle(isLiked, "liked")}
+        ></Icon>
+        <Icon
+          name={`bookmark${isBook ? "" : " outline"}`}
+          color={isBook ? "blue" : "grey"}
+          link
+          onClick={() => toggle(isBook, "bookmark")}
+        ></Icon>
+        {postData.author?.uid !== Auth.currentUser?.uid ? (
+          ""
+        ) : (
+          <Icon name="delete" color="red" link onClick={() => Delete()}></Icon>
+        )}
+      </Segment>
+      <Comment.Group>
+        <Form>
+          <Form.TextArea
+            value={commentContent}
+            onChange={(e) => {
+              setComment(e.target.value);
+            }}
+          ></Form.TextArea>
+          <Form.Button
+            loading={Loading}
+            onClick={() => {
+              addComment();
+            }}
+          >
+            留言
+          </Form.Button>
+        </Form>
+        <Header>共留言{postData.commentCount || 0}則</Header>
+        {commentsData.map((commentItme) => {
+          return (
+            <Comment>
+              <Comment.Avatar src={commentItme.author?.photoUrl || ""} />
+              <Comment.Author as="span">
+                {commentItme.author?.displayName || "使用者"}
+              </Comment.Author>
+              <Comment.Metadata>
+                {commentItme.createAt?.toDate().toLocaleDateString()}
+              </Comment.Metadata>
+              <Comment.Text>{commentItme.comment}</Comment.Text>
+            </Comment>
+          );
+        })}
+      </Comment.Group>
+    </Item>
   );
 }
 

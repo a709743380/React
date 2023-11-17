@@ -30,7 +30,7 @@ function Signin() {
     } else {
       signInWithEmailAndPassword(Auth, email, password)
         .then((userCredential) => {
-            navigate("/React");
+            navigate("/React/Posts");
         })
         .catch((error) => {
           seterr(error.code);
@@ -40,7 +40,7 @@ function Signin() {
   }
   function SingWithGoogle() {
     signInWithPopup(Auth, provider);
-    navigate("/React");
+    navigate("/React/Posts");
   }
   return (
     <Container>
