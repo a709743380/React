@@ -3,6 +3,9 @@ import Signin from "./Pages/Signin";
 import MemberLayout from "./MemberLayout";
 import ViewPost from "./Pages/ViewPost";
 import PostLayout from "./PostLayout";
+import MyPost from "./Pages/MyPost";
+import MyCollections from "./Pages/MyCollections";
+import MySetting from "./Pages/MySetting";
 
 const AppRoutes = [
   {
@@ -31,15 +34,15 @@ const AppRoutes = [
   },
   {
     path: "/React/my/posts",
-    element: <MemberLayout element={"我的文章"} />,
+    element: <MemberLayout element={<MyPost />} />,
   },
   {
     path: "/React/my/collections",
-    element: <MemberLayout element={"我的收藏"} />,
+    element: <MemberLayout element={<MyCollections />} />,
   },
   {
     path: "/React/my/setting",
-    element: <MemberLayout element={"我的設定"} />,
+    element: <MemberLayout element={<MySetting />} />,
   },
 ];
 

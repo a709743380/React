@@ -1,7 +1,8 @@
-import { Item } from "semantic-ui-react";
+import { Item , Icon , Image } from "semantic-ui-react";
+import { Link } from "react-router-dom";
 
-
-function GetPost() {
+function GetPost(postItem) {
+  const postItemData = postItem.postItem;
   return (
     <Item
       key={postItemData.id}
