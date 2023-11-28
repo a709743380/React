@@ -2,7 +2,7 @@ import { Container, Grid } from "semantic-ui-react";
 import Topics from "./Topics";
 
 function PostLayout(props) {
-  console.log(props)
+
   return  (
     <Container>
       <Grid>

@@ -1,16 +1,18 @@
-import { useState } from "react";
+import {  React  , useState} from "react";
 import { Modal, Header, Segment, Input, Button } from "semantic-ui-react";
 
-function MyUpData(props) {
-
-    const [isModalOpen,setIsModalOpen] = useState(props.isModalOpen);
+function MyUpData({inputIsModalOpen}) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    React.useEffect(()=>{
+      setIsModalOpen(inputIsModalOpen.ModalOpen)
+    })
 
   return (
     <>
       <Header>???</Header>
       <Segment></Segment>
-      <Modal open={isModalOpen}>
-        <Modal.Header>{props?.updateName}</Modal.Header>
+      <Modal open={true}>
+        <Modal.Header>{inputIsModalOpen?.updateName}</Modal.Header>
         <Modal.Content>
           <Input></Input>
           <Button>確定</Button>

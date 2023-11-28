@@ -1,4 +1,4 @@
-import { Icon, Item } from "semantic-ui-react";
+import { Item } from "semantic-ui-react";
 import React from "react";
 import { getDocs } from "firebase/firestore";
 import { db_posts } from "../utils/firebase";
@@ -23,8 +23,8 @@ function Posts() {
 
   return (
     <Item.Group>
-      {colPost.map((postItemData) => {
-        return (<GetPost postItem={postItemData} />);
+      {colPost.map((postItemData, index) => {
+        return <GetPost key={index} postItem={postItemData} />;
       })}
     </Item.Group>
   );

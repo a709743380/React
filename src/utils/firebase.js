@@ -19,6 +19,7 @@ const firebase = initializeApp(firebaseConfig);
 const firesstore = getFirestore(firebase);
 const analytics = getAnalytics(firebase);
 // Initialize Firebase Authentication and get a reference to the service
+export const firebases = initializeApp(firebaseConfig);
 export const Auth = getAuth(firebase);
 export const db_topics = collection(getFirestore(firebase), "topics");
 export const db_posts = collection(getFirestore(firebase), "posts");

@@ -1,23 +1,10 @@
 import { Link } from "react-router-dom";
 import { Menu, Search } from "semantic-ui-react";
 import { Auth } from "./utils/firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import React from "react";
-import New_posts from "./Pages/new_posts";
 
-function Header() {
-  {
-    /*設定初始值  參數 ， function  */
-  }
-  const [user, setUser] = React.useState(null);
-  {
-    /*監聽是否有為登錄狀態 */
-  }
-  React.useEffect(() =>
-    onAuthStateChanged(Auth, (currentuser) => {
-      setUser(currentuser);
-    })
-  );
+function Header({ user }) {
 
   function handleSignOut() {
     signOut(Auth);
@@ -40,13 +27,10 @@ function Header() {
             >
               發佈文章
             </Menu.Item>
-            <Menu.Item
-              style={{ color: "#ff6" }}
-              as={Link}
-              to="/React/my"
-            >
-              會員資料
-            </Menu.Item>
+              <Menu.Item style={{ color: "#ff6" }} as={Link} to="/React/my">
+                會員資料
+              </Menu.Item>
+
             <Menu.Item
               style={{ color: "#ff6" }}
               as={Link}

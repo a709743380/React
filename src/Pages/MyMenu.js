@@ -1,9 +1,9 @@
 import { List } from "semantic-ui-react";
 import { Link, useLocation } from "react-router-dom";
 
-function MyMenu() {
+function MyMenu({isGoogleUser}) {
   const location = useLocation();
-  const myMenuList = [
+  let myMenuList = [
     {
       path: "/React/my/posts",
       name: "我的文章",
@@ -17,6 +17,8 @@ function MyMenu() {
       name: "設定資料",
     },
   ];
+  console.log( isGoogleUser);
+  isGoogleUser ? ([myMenuList[2], ...myMenuList] = myMenuList) : "";
 
   return (
     <List animated selection>
