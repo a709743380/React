@@ -26,7 +26,7 @@ function MyPost({user}) {
   return (
     <Item.Group>
       {myPost.map((postItemData) => {
-        return <GetPost postItem={postItemData} />;
+        return <GetPost postItemData={postItemData} />;
       })}
     </Item.Group>
   );

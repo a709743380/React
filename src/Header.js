@@ -4,11 +4,18 @@ import { Auth } from "./utils/firebase";
 import { signOut } from "firebase/auth";
 import React from "react";
 
-function Header({ user }) {
+function Header({ user, setUser}) {
 
   function handleSignOut() {
-    signOut(Auth);
+    signOut(Auth).then(()=>{
+
+      setUser(null);
+
+    });
+    console.log("console.log(user)")
+    console.log(user)
   }
+console.log(user)
   return (
     <Menu style={{ backgroundColor: "black" }}>
       <Menu.Item style={{ color: "#ff6" }} as={Link} to="/React/Posts">
@@ -35,7 +42,7 @@ function Header({ user }) {
               style={{ color: "#ff6" }}
               as={Link}
               to="/React/Signin"
-              onClick={() => handleSignOut()}
+              onClick={handleSignOut}
             >
               登出
             </Menu.Item>

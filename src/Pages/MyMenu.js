@@ -17,7 +17,7 @@ function MyMenu({isGoogleUser}) {
       name: "設定資料",
     },
   ];
-  console.log( isGoogleUser);
+
   isGoogleUser ? ([myMenuList[2], ...myMenuList] = myMenuList) : "";
 
   return (

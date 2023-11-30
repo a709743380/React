@@ -24,7 +24,7 @@ function Posts() {
   return (
     <Item.Group>
       {colPost.map((postItemData, index) => {
-        return <GetPost key={index} postItem={postItemData} />;
+        return <GetPost key={index} postItemData={postItemData} />;
       })}
     </Item.Group>
   );

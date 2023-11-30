@@ -19,14 +19,15 @@ function MyCollections() {
         setMyCollections(querymyCollections);
       });
     };
-
+    
     getMyCollections();
+    console.log(myCollections);
   }, []);
 
   return (
     <Item.Group>
-      {myCollections.map((postItemData) => {
-        return <GetPost postItem={postItemData} />;
+      {myCollections?.map((postItemData) => {
+        return <GetPost postItemData={postItemData} />;
       })}
     </Item.Group>
   );

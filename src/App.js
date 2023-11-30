@@ -18,19 +18,21 @@ function App() {
   const [isGoogleUser, setIsGoogleUser] = React.useState(null);
   React.useEffect(() => {
     onAuthStateChanged(Auth, (currentuser) => {
-      let isGoogleUser = currentuser.providerData.some(
-        (provider) => provider.providerId === "google.com"
-      );
- 
-      setIsGoogleUser(isGoogleUser);
-      setUser(currentuser); // 确保这不会导致组件无限循环
+      if (currentuser) {
+        let isGoogleUser = currentuser.providerData.some(
+          (provider) => provider.providerId === "google.com"
+        );
+
+        setIsGoogleUser(isGoogleUser);
+        setUser(currentuser); 
+        console.log("xuan")
+      }
     });
   }, []);
-
   return (
     <BrowserRouter>
       {/* Header固定 */}
-      <Header user={user} />
+      <Header user={user}  setUser ={setUser}isGoogleUser={isGoogleUser} />
       <Routes>
         <Route
           key="Posts"
@@ -53,22 +55,47 @@ function App() {
         <Route
           key="posts"
           path="/React/my/posts"
-          element={<MemberLayout  isGoogleUser={isGoogleUser} element={<MyPost user={user} />} />}
+          element={
+            <MemberLayout
+              isGoogleUser={isGoogleUser}
+              element={<MyPost user={user} />}
+            />
+          }
         />
         <Route
           key="collections"
           path="/React/my/collections"
-          element={<MemberLayout  isGoogleUser={isGoogleUser} element={<MyCollections />} />}
+          element={
+            <MemberLayout
+              isGoogleUser={isGoogleUser}
+              element={<MyCollections />}
+            />
+          }
         />
-       {isGoogleUser ?
-       ""
-       :
-       <Route
-          key="setting"
-          path="/React/my/setting"
-          element={<MemberLayout isGoogleUser={isGoogleUser} element={<MySetting user={user} />} />}
+
+        <Route
+          key="my"
+          path="/React/my/"
+          element={
+            <MemberLayout
+              isGoogleUser={isGoogleUser}
+            />
+          }
         />
-       } 
+        {isGoogleUser ? (
+          ""
+        ) : (
+          <Route
+            key="setting"
+            path="/React/my/setting"
+            element={
+              <MemberLayout
+                isGoogleUser={isGoogleUser}
+                element={<MySetting user={user} />}
+              />
+            }
+          />
+        )}
       </Routes>
     </BrowserRouter>
   );

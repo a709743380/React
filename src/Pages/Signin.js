@@ -8,7 +8,6 @@ import {
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
-
 function Signin() {
   const [activeItem, setActiveIrem] = React.useState("register");
   const [email, setemail] = React.useState("");
@@ -30,7 +29,7 @@ function Signin() {
     } else {
       signInWithEmailAndPassword(Auth, email, password)
         .then((userCredential) => {
-            navigate("/React/Posts");
+          navigate("/React/Posts");
         })
         .catch((error) => {
           seterr(error.code);
@@ -77,6 +76,7 @@ function Signin() {
           type="password"
           value={password}
           onChange={(e) => setpassword(e.target.value)}
+          autoComplete="current-password"
           placeholder="請輸入密碼"
         />
 
@@ -85,7 +85,7 @@ function Signin() {
           {activeItem === "register" && "註冊"}
           {activeItem === "sigin" && "登錄"}
         </Form.Button>
-        <Form.Button loading={isLoading} onClick={()=>SingWithGoogle()}>
+        <Form.Button loading={isLoading} onClick={() => SingWithGoogle()}>
           {"google登录"}
         </Form.Button>
       </Form>

@@ -1,6 +1,6 @@
 
 import { initializeApp } from "firebase/app";
-import { getAuth ,GoogleAuthProvider } from "firebase/auth";
+import { getAuth ,GoogleAuthProvider,updateProfile } from "firebase/auth";
 import { getFirestore, collection } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';

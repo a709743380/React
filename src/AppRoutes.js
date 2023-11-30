@@ -21,10 +21,6 @@ const AppRoutes = [
     element: <New_posts />,
   },
   {
-    path: "/React/my/",
-    element: <MemberLayout />,
-  },
-  {
     path: "/React/Posts",
     element: <PostLayout element={<Posts />} />,
   },
