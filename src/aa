@@ -1,0 +1,842 @@
+@using EC.EFCMVC.Helpers
+@using EC.Infrastructure.Constants
+@using EC.Infrastructure.Enums.EnumAttributes
+@using EC.Infrastructure.Models.Dtos.EForm
+@using EC.Infrastructure.Models.Dtos.EForm.SubForm
+@using EC.Infrastructure.Models.Dtos.EForm.SubForm.BAS001
+@model EFormInfoVw
+@{
+	var pageInfo = (PageInfo)ViewData["PageInfo"]! ?? new PageInfo();
+	var nextPage = ViewData["NextPage"] as RouteInfo;
+	var answer = JsonConvert.DeserializeObject<BAS001_JsonContent>(Model.EcEformAnswer.JsonContent);
+
+	// 新勾選的項目會是 null ，設定初始化對照表
+	var subFormCodeToFieldMap = new Dictionary<string, Action>
+			{
+				[BAS001SubFormCodeEnum.ElectronicPassword_90.GetECEnumCode()] = () => answer.ElectronicPassword_90 ??= new(),
+				[BAS001SubFormCodeEnum.TransferAccount_16.GetECEnumCode()] = () => answer.TransferAccount_16 ??= new(),
+				[BAS001SubFormCodeEnum.Phone_07.GetECEnumCode()] = () => answer.Phone_07 ??= new(),
+				[BAS001SubFormCodeEnum.Mobile_18.GetECEnumCode()] = () => answer.Mobile_18 ??= new(),
+				[BAS001SubFormCodeEnum.MailingAddress_10.GetECEnumCode()] = () => answer.MailingAddress_10 ??= new(),
+				[BAS001SubFormCodeEnum.PermanentAddress_09.GetECEnumCode()] = () => answer.PermanentAddress_09 ??= new(),
+				[BAS001SubFormCodeEnum.Email_19.GetECEnumCode()] = () => answer.Email_19 ??= new(),
+				[BAS001SubFormCodeEnum.Contact_CT.GetECEnumCode()] = () => answer.Contact_CT ??= new(),
+			};
+
+	// PartialView 對照表
+	var subFormMappings = new List<(string FormCode, string EnumDesc, string SubFormCode, string PartialName, BAS001_JsonContent? answer)>
+	{
+		(FormCode.BAS001.GetDesc(), BAS001SubFormCodeEnum.OnlineSigning_96.GetECEnumDesc(), BAS001SubFormCodeEnum.OnlineSigning_96.GetDesc(), "_BAS001-96-1",  answer),
+		(FormCode.BAS001.GetDesc(), BAS001SubFormCodeEnum.ElectronicPassword_90.GetECEnumDesc(), BAS001SubFormCodeEnum.ElectronicPassword_90.GetDesc(), "_BAS001-90-1", answer),
+		(FormCode.BAS001.GetDesc(), BAS001SubFormCodeEnum.TransferAccount_16.GetECEnumDesc(), BAS001SubFormCodeEnum.TransferAccount_16.GetDesc(), "_BAS001-16-1", answer),
+		(FormCode.BAS001.GetDesc(), BAS001SubFormCodeEnum.Phone_07.GetECEnumDesc(), BAS001SubFormCodeEnum.Phone_07.GetDesc(), "_BAS001-07", answer),
+		(FormCode.BAS001.GetDesc(), BAS001SubFormCodeEnum.Mobile_18.GetECEnumDesc(), BAS001SubFormCodeEnum.Mobile_18.GetDesc(), "_BAS001-18", answer),
+		(FormCode.BAS001.GetDesc(), BAS001SubFormCodeEnum.MailingAddress_10.GetECEnumDesc(), BAS001SubFormCodeEnum.MailingAddress_10.GetDesc(), "_BAS001-10", answer),
+		(FormCode.BAS001.GetDesc(), BAS001SubFormCodeEnum.PermanentAddress_09.GetECEnumDesc(), BAS001SubFormCodeEnum.PermanentAddress_09.GetDesc(), "_BAS001-09", answer),
+		(FormCode.BAS001.GetDesc(), BAS001SubFormCodeEnum.Email_19.GetECEnumDesc(), BAS001SubFormCodeEnum.Email_19.GetDesc(), "_BAS001-19", answer),
+		(FormCode.BAS001.GetDesc(), BAS001SubFormCodeEnum.Contact_CT.GetECEnumDesc(), BAS001SubFormCodeEnum.Contact_CT.GetDesc(), "_BAS001-CT", answer)
+	};
+
+	// 設定來源清單，根據是否為 SelectedSubFormDtos 或 EformSubFormAnswers
+	// 如果從申請頁面進入，會有 SelectedSubFormDtos 勾選的項目
+	var result = SubFormHelper.CreateEFormSubFormAnswerDtos(Model, pageInfo);
+	var sourceSubForms = result.sourceSubForms;
+	List<EFormSubFormAnswerDto> EFormSubFormAnswerDtos = result.eFormSubFormAnswerDtos;
+
+	// 根據有勾選的項目進行初始化
+	foreach (var subFormCode in subFormCodeToFieldMap.Keys)
+	{
+		if (sourceSubForms.Any(x => x.SubFormCode == subFormCode))
+		{
+			subFormCodeToFieldMap[subFormCode].Invoke();
+		}
+	}
+}
+
+<section id="partialContainerLoadBASHeader">
+	@Html.EditorForModel("CustomerInfoPannel", new { @attribute = new CustomerInfoPannel(Model.CustomerInfo, false) })
+</section>
+
+<div class="container mt-4">
+	@if (sourceSubForms != null && sourceSubForms.Any() && subFormMappings != null)
+	{
+		var activeSubForms = subFormMappings
+		.Where(subForm => sourceSubForms.Any(x => x.FormCode == subForm.FormCode && x.SubFormCode == subForm.SubFormCode))
+		.ToList();
+
+		if (activeSubForms.Any())
+		{
+			<div id="customTabCarousel_Forms" class="w-100 my-3 carousel slide" data-bs-touch="false" data-bs-interval="false">
+
+				<!--  上方Tab 頁籤列 -->
+				<div class="d-flex flex-nowrap overflow-auto user-select-none mb-3 pb-2 border-bottom">
+					@for (int i = 0; i < activeSubForms.Count; i++)
+					{
+						var subForm = activeSubForms[i];
+						var isActive = i == 0;
+
+						<button type="button"
+								id="customTabCarousel_@subForm.SubFormCode"
+								class="btn @(isActive ? "btn-danger shadow-sm" : "btn-danger") me-2 rounded-pill text-nowrap fw-medium px-4 flex-shrink-0 TabsBar"
+								data-bs-target="#customTabCarousel_Forms"
+								data-fnKey="@(FormCode.BAS001.GetDesc() + "_" + @subForm.SubFormCode)"
+								data-bs-slide-to="@i">
+							@(string.IsNullOrEmpty(subForm.EnumDesc) ? $"表單 {i + 1}" : subForm.EnumDesc)
+						</button>
+					}
+				</div>
+
+				<!-- 下方 內容區 (overflow-visible 確保卡片內選單不被切掉) -->
+				<div class="carousel-inner overflow-visible">
+					@for (int i = 0; i < activeSubForms.Count; i++)
+					{
+						var subForm = activeSubForms[i];
+						<div class="carousel-item @(i == 0 ? "active" : "")">
+							<div class="card shadow-sm h-100">
+								<div class="card-body">
+									@await Html.PartialAsync(subForm.PartialName, subForm.answer, new ViewDataDictionary(ViewData))
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+
+			</div>
+		}
+	}
+	@await Html.PartialAsync("_BAS001CustomerFilledContent", Model, new ViewDataDictionary(ViewData) { { "SourceSubForms", sourceSubForms } })
+
+	@Html.EditorForModel("UploadImg", new { @attribute = new UploadImgViewModel { showPopView = true, showImgView = false, showDivViewImages = false, showUploadImgBtn = false } })
+
+	@await Html.PartialAsync("PartialView/_PartialFormAction", Model.FormRole)
+
+</div>
+
+@section Scripts {
+	<script src="~/lib/signature/signature_pad.umd.min.js" asp-append-version="true"></script>
+	<script src="~/js/EForm.js" asp-append-version="true"></script>
+	<script src="~/js/EFCUploadImg.js" asp-append-version="true"></script>
+	<script src="~/js/formAction.js" asp-append-version="true"></script>
+	<script src="~/js/UploadImgDefaultSetting.js" asp-append-version="true"></script>
+	<script src="~/js/EFCLoadImg.js" asp-append-version="true"></script>
+	<script src="~/js/FuzzyInput.js" asp-append-version="true"></script>
+	<script src="~/js/ExternalAPI.js" asp-append-version="true"></script>
+	<script src="~/js/generalFunction.js" asp-append-version="true"></script>
+	<script>
+		const pageTitle = '基本資料異動(客戶填寫)';
+		const ecWebAPI = '@ViewBag.ECWebAPI';// || window.location.origin;
+		const model = @Html.Raw(JsonConvert.SerializeObject(Model));
+		const params = new URLSearchParams(window.location.search);
+		// 有可能從經辦填寫頁面回上一頁帶在QueryString
+		const acsn = @(pageInfo.Acsn) || params.get('acsn');
+		const defaultUrl = '@Url.Action("index", "CaseAudit")';
+		const _formNo = model.ecEform.formNo;
+
+		const dynamicParams = { acsn };
+		var urls = getNavigationUrls(defaultUrl,dynamicParams);
+
+		let answerJsonContent = @Html.Raw(JsonConvert.SerializeObject(answer));
+		const eFormSubFormAnswerDtos = @Html.Raw(JsonConvert.SerializeObject(EFormSubFormAnswerDtos));
+
+		const $onlineSigningArea = $("#onlineSigningArea"); // 線上見簽
+		const $electronicPasswordArea = $("#electronicPasswordArea"); // 密碼補發檢查
+		const $transferAccountArea = $("#transferAccountArea"); // 款項劃撥帳號
+
+		const $phoneArea = $("#phoneArea"); // 電話號碼
+		const $mobileArea = $("#mobileArea"); // 行動電話
+		const $mailingAddressArea = $("#mailingAddressArea"); // 通訊地址
+		const $permanentAddressArea = $("#permanentAddressArea"); // 戶籍地址
+		const $emailArea = $("#emailArea"); // 電子郵件信箱變更
+		const $contactArea = $("#contactArea"); // 聯絡人
+
+		var $carousel = $('#customTabCarousel_Forms');
+		var $tabBar = $carousel.find('.d-flex.overflow-auto');
+		var $tabs = $tabBar.find('button');
+		var $items = $carousel.find('.carousel-item');
+
+		const validators = {
+			// 線上簽署 (96)
+			'BAS001_96': typeof validate96 === "function" ? validate96 : null,
+
+			// 款項劃撥帳號 (16)
+			'BAS001_16': typeof validate16 === "function" ? validate16 : null,
+
+			// 電話號碼
+			'BAS001_07': typeof validate07 === "function" ? validate07 : null,
+
+			// 行動電話
+			'BAS001_18': typeof validate18 === "function" ? validate18 : null,
+
+			// 電子密碼 (90)
+			'BAS001_90': typeof validate90 === "function" ? validate90 : null,
+
+			// 通訊地址
+			'BAS001_10': typeof validate10 === "function" ? validate10 : null,
+
+			// 戶籍地址
+			'BAS001_09': typeof validate09 === "function" ? validate09 : null,
+
+			// 電子郵件信箱變更
+			'BAS001_19': typeof validate19 === "function" ? validate19 : null,
+
+			// 客製條款 (CT)
+			'BAS001_CT': typeof validateCT === "function" ? validateCT : null
+		};
+
+		const subFormValidators = Object.fromEntries(
+			Object.entries(validators).filter(([key, validator]) => validator !== null)
+		);
+
+		function validate90(){
+			const isAnyChecked = $("input[name='internetPasswordOption']:checked").length > 0 || $("#voicePassword").is(":checked");
+
+				if (!isAnyChecked) {
+					$("#electronicPasswordDanger").removeClass("d-none");
+					return false;
+				}
+			return true;
+		}
+		function validate96() {
+			// $onlineSigningArea
+			return true;
+		}
+
+		//款項劃撥帳號
+		function validate16() {
+			const bankCode = $transferAccountArea.find("#bankInput").attr("data-key"); // 資料會異動，.data()會緩存不使用
+				const bankAccount = $transferAccountArea.find("#bankAccount").val();
+				if(!bankCode){
+					$transferAccountArea.find("#bankInput").addClass("is-invalid");
+					return false;
+				}
+
+				if(!bankAccount){
+					$transferAccountArea.find("#bankAccount").addClass("is-invalid");
+					return false;
+				}
+
+				const reg1 = /^\d{1,16}$/; // 匹配小於 16 碼的數字帳號
+				const reg2 = /^0+$/; // 全部輸入 0
+				if(!reg1.test(bankAccount) || reg2.test(bankAccount)){
+					$transferAccountArea.find("#bankAccount").addClass("is-invalid");
+					return false;
+				}
+
+				// 如果銀行代碼為永豐 807
+				if(/^807/.test(bankCode)){
+					// 帳號開頭不可為 341 分戶帳
+					if(/^341/.test(bankAccount)){
+						$transferAccountArea.find("#bankAccount").addClass("is-invalid");
+						return false;
+					}
+
+					// 必需為 14 碼帳號
+					if (bankAccount.length !== 14){
+						$transferAccountArea.find("#bankAccount").addClass("is-invalid");
+						return false;
+					}
+				}
+
+			return true;
+		}
+
+		// 電話號碼
+		function validate07() {
+							// 取得輸入值並去除前後空白
+			let basicArea = $('#sTBasicAreaCode').val().trim();
+			let basicPhone = $('#sTBasicPhone').val().trim();
+
+			let companyArea = $('#sTCompanyAreaCode').val().trim();
+			let companyPhone = $('#sTCompanyPhone').val().trim();
+
+			// 1. 判斷公司/工廠電話是否有輸入資料 (區碼或號碼任一有填)
+			let hasCompanyData = companyArea !== '' || companyPhone !== '';
+
+			// 2. 判斷住家/營業所電話是否完整 (區碼與號碼皆必須有填)
+			let isBasicComplete = basicArea !== '' && basicPhone !== '';
+
+			// 3. 判斷邏輯：公司電話有資料，但住家/營業所電話不完整
+			if (hasCompanyData && !isBasicComplete) {
+				layoutPopup.init().paramer({title: '提示訊息',html: '<div>公司/工廠電話已有資料，住家/營業所在電話（區碼與電話）不得為空白，請先輸入住家/營業所在電話。</div>',showCancel: false}).show();
+				// // 判斷哪個欄位沒填，精準 Focus
+				// if (basicArea === '') {
+				// 	$('#sTBasicAreaCode').focus();
+				// } else {
+				// 	$('#sTBasicPhone').focus();
+				// }
+
+				return false; // 驗證失敗
+			}
+		}
+
+		function validate18() {
+
+			let isValid = true;
+
+			const stMobile = $("#sTMobile").val().trim();
+			const fsMobile = $("#fSMobile").val().trim();
+
+			// 證券行動電話
+			if (!stMobile) {
+				$("#sTMobile").addClass("is-invalid");
+				isValid = false;
+			} else {
+				$("#sTMobile").removeClass("is-invalid");
+			}
+
+			// 複委託行動電話
+			if (!fsMobile) {
+				$("#fSMobile").addClass("is-invalid");
+				isValid = false;
+			} else {
+				$("#fSMobile").removeClass("is-invalid");
+			}
+
+			return isValid;
+		}
+
+		function validate90() {
+			if ($electronicPasswordArea.length > 0) {
+				let isAnyChecked = $("input[name='internetPasswordOption']:checked").length > 0 || $("#voicePassword").is(":checked");
+
+				if (!isAnyChecked) {
+					$("#electronicPasswordDanger").removeClass("d-none");
+					return false;
+				}
+			}
+			return true;
+		}
+
+		function validate10() {
+			return true;
+		}
+
+		function validate09() {
+
+			let isValid = true;
+
+			const postalCode = $("#permanentPostalCode").val().trim();
+			const address = $("#permanentAddress").val().trim();
+
+			// 戶籍地址郵遞區號
+			if (!postalCode) {
+				$("#permanentPostalCode").addClass("is-invalid");
+				isValid = false;
+			} else {
+				$("#permanentPostalCode").removeClass("is-invalid");
+			}
+
+			// 戶籍地址
+			if (!address) {
+				$("#permanentAddress").addClass("is-invalid");
+				isValid = false;
+			} else {
+				$("#permanentAddress").removeClass("is-invalid");
+			}
+
+			return isValid;
+		}
+
+		function validate19() {
+			return true;
+		}
+
+		function validateCT() {
+			return true;
+		}
+
+		// 統一定義所有檢查結果
+		const isPhoneExists = checkAreaExists($phoneArea, "電話號碼");
+		const isMobileExists = checkAreaExists($mobileArea, "行動電話");
+		const isMailingExists = checkAreaExists($mailingAddressArea, "通訊地址");
+		const isPermanentExists = checkAreaExists($permanentAddressArea, "戶籍地址");
+		const isEmailExists = checkAreaExists($emailArea, "電子郵件信箱");
+		const isContactExists = checkAreaExists($contactArea, "聯絡人資料");
+
+		function checkAreaExists(area, areaName) {
+		  if (area.length === 0) {
+			console.warn(`${areaName} 區塊不存在於畫面上！`);
+			return false;
+		  }
+
+		  return true;
+		}
+
+		$(async () => {
+			layoutLoading.show();
+
+			const formActionInitObj = {
+				formNo:model.ecEform.formNo,
+				pageTitle,
+				backUrl: urls.backUrl,
+				onGoBack: () => {
+					layoutPopup.init().paramer({ content: "是否離開此頁面？" }).show(() => {
+						layoutPopup.close();
+						location.replace(urls.previousUrl);
+					});
+				},
+				onSave: saveData,
+				onConfirm: applyConfirm
+			}
+
+			// 款項劃撥 取得金資代號
+			const bankInfoPromise = (() => {
+				if ($transferAccountArea.length > 0) {
+					return fetchBankInfo();
+				} else {
+					return Promise.resolve();
+				}
+			})();
+
+			// 取得所有圖片
+			const processPhotosPromise = EFCLoadImgScript.processPhotos(model.ecEformPhotos, {
+				onComplete: (photos) => {
+					// 所有圖片請求完成後執行的邏輯
+					fatcaAndCrsObj.setImgStorage(photos.filter(photo => photo.tag === 8)); // 8 = FATCA、CRS
+					rocFatcaAndCrsObj.setImgStorage(photos.filter(photo => photo.tag === 8001)); // 8001 = FATCA、CRS (僅具中華民國稅務居民身份)
+
+					const custSignPhoto =  photos.find(photo => photo.tag === 9); // 9=客戶簽名
+
+					if (custSignPhoto && custSignPhoto.source) {
+						$('#divsign0 img.imgsign').attr('src', custSignPhoto.source).show();
+					}
+
+					const fatcaImgs = fatcaAndCrsObj.getImgStorage();
+					// 檢查圖片是否已上傳
+					if(fatcaImgs && fatcaImgs.length > 0){
+						$('#btnUploadFatcaAndCrs').removeClass('btn-danger').addClass('btn-success'); // 上傳按鈕圖片改為success
+					}
+				}
+			});
+
+			const processOcrInfoPromise = (() => {
+				// 1. 取得畫面上欄位的值並判斷是否有資料
+				// const hasPostalCode = $('#sTPermanentPostalCode')?.val()?.trim() !== '';
+				const hasAddress = $('#permanentAddress')?.val()?.trim() !== '';
+
+				// 2. 如果畫面已有資料，直接回傳 Resolve，不呼叫 API
+				if (hasAddress) {
+					console.log('畫面上已有戶籍地址資料，跳過 OCR API 呼叫。');
+					return Promise.resolve({ skipped: true, reason: '畫面已有資料' });
+				}
+
+				// 3. 畫面沒資料，執行原本的 OCR API 呼叫並回傳其 Promise
+				const ocrSN = answerJsonContent.ocrInfo.find(item => item.tag === 7)?.ocrSN;
+				if(!ocrSN){
+					return Promise.resolve({ skipped: true, reason: '無辨識結果' });
+				}
+
+				//更新UI ocr辨識結果的戶籍地址
+				return EFormScript.getOcrInfoReq(answerJsonContent.ocrInfo.find(item => item.tag === 7)?.ocrSN)
+						.then((OCRInfo) => {
+							 if (!$('#permanentAddress').val()) {
+								$('#permanentAddress').val(OCRInfo.address);
+							}
+						});
+			})();
+
+		// 等待所有 Promise 執行完畢
+		Promise.allSettled([bankInfoPromise, processPhotosPromise, processOcrInfoPromise])
+			.then((results) => {
+				console.log('所有非同步作業處理完畢', results);
+			});
+			// 等待所有 Promise 執行完畢
+			Promise.allSettled([bankInfoPromise, processPhotosPromise, processOcrInfoPromise])
+			.then(() => {
+				// 最終邏輯：白名單處理及彈窗提示
+				// 判斷帳號是否已註銷
+				checkAccountStatus(model.customerInfo);
+			})
+			.finally(() => {
+				layoutLoading.close();
+			});
+
+			// 如果有勾選款項劃撥帳號
+			if($transferAccountArea.length > 0){
+				$transferAccountArea.find('#btnReloadBankInfo').on('click',async function () {
+					try {
+						layoutLoading.show();
+
+						// 更新銀行資料
+						await ExternalAPIScript.updateBankInfo();
+
+						// 重新取得銀行資料
+						await fetchBankInfo();
+
+					} catch (err) {
+						console.error('更新或取得交割銀行失敗：', err);
+						alert('更新或取得交割銀行失敗，請洽系統管理員！');
+					} finally {
+						layoutLoading.close();
+					}
+				});
+			}
+
+			/** 功能按鈕初始化 */
+			formActionScript.init(formActionInitObj);
+
+			// 客戶 FATCA 選項變更事件
+			$("input[name='fatcaOption']").on("change", function() {
+				var selectedValue = $(this).val();
+				var $uploadRocButton = $("#btnUploadRocFatcaAndCrs"); // 圖片上傳按鈕 1.僅具中華民國稅務居民身份
+				var $uploadButton = $("#btnUploadFatcaAndCrs"); // 圖片上傳按鈕 2.具外國/美國稅務居民者身分且願意提供 FATCA 暨 CRS 相關文件
+
+				switch (selectedValue) {
+					case '1':
+						$uploadRocButton.prop("disabled", false); // 啟用
+						$uploadButton.prop("disabled", true); // 禁用
+						break;
+					case '2':
+						$uploadRocButton.prop("disabled", true); // 禁用
+						$uploadButton.prop("disabled", false); // 啟用
+						break;
+					default:
+						$uploadRocButton.prop("disabled", true); // 禁用
+						$uploadButton.prop("disabled", true); // 禁用
+						break;
+				}
+			});
+
+
+			function validateTab(index) {
+				var $item = $items.eq(index);
+				var isValid = true;
+
+				// 紀錄驗證結果至按鈕的 data 屬性
+				$tabs.eq(index).data('is-valid', isValid);
+				return isValid;
+			}
+
+			function updateTabStyles(activeIndex) {
+				$tabs.each(function (i) {
+					var $tab = $(this);
+					var isActive = (i === activeIndex);
+					var isValid = $tab.data('is-valid') === true;
+
+					// 清除現有顏色樣式
+					$tab.removeClass('btn-danger btn-outline-danger btn-success btn-outline-success shadow-sm');
+
+					if (isActive) {
+						// 當前頁籤：通過顯示綠底，未通過顯示紅底
+						if (isValid) {
+							$tab.removeClass('btn-danger shadow-sm');
+							$tab.addClass('btn-success shadow-sm');
+						} else {
+							$tab.addClass('btn-danger shadow-sm');
+							$tab.removeClass('btn-success shadow-sm');
+						}
+					} else {
+						// 非當前頁籤：通過顯示綠框，未通過顯示紅框
+						if (isValid) {
+							$tab.removeClass('btn-danger shadow-sm');
+							$tab.addClass('btn-success shadow-sm');
+						} else {
+							$tab.addClass('btn-danger shadow-sm');
+							$tab.removeClass('btn-success shadow-sm');
+						}
+					}
+				});
+			}
+
+			// 1. 開始切換時 (slide.bs.carousel)：驗證「離開」的 Tab
+			$carousel.on('slide.bs.carousel', function (e) {
+				var fromIndex = e.from;
+				if (fromIndex !== undefined) {
+					validateTab(fromIndex);
+				}
+			});
+
+			// 2. 切換完成時 (slid.bs.carousel)：更新 Tab 顏色樣式與滾動置中
+			$carousel.on('slid.bs.carousel', function (e) {
+				var activeIndex = (e.to !== undefined) ? e.to : $items.filter('.active').index();
+				// 清除動畫殘留 transform
+				$carousel.find('.carousel-item').css('transform', '');
+				// 重新更新所有 Tab 顏色
+				updateTabStyles(activeIndex);
+
+			});
+
+			// 3. 即時驗證：當使用者在輸入框打字/修改時，即時檢查並變更 Tab 顏色
+			$carousel.on('input change', '.required', function () {
+				var activeIndex = $items.filter('.active').index();
+				if (activeIndex !== -1) {
+					validateTab(activeIndex);
+					updateTabStyles(activeIndex);
+				}
+			});
+		});
+
+		async function fetchBankInfo() {
+			try {
+				const fuzzyObj = FuzzyInputScript('#bankInput', '#bankDropdown');
+
+				let result = await ExternalAPIScript.getBankInfo(model.customerInfo.custBrokerNo3);
+				result = result.map(item => ({
+					...item, // 保留其他屬性 (如 bankCode、bankName)
+					displayValue: `${item.bankCode}-${item.bankName}` // 組合顯示的值
+				}));
+
+				// 更新金資代號清單
+				fuzzyObj.updateData(result, 'bankCode', 'bankName', 'displayValue');
+
+				// 如果已有填寫資料，#bankInput 值由 MVC 代入 bankCode
+				// 將已帶入 #bankInput 的值與清單對照取得對應的選項
+				fuzzyObj.renderDropdown();
+			} catch (err) {
+				console.error('取得金資資料時發生錯誤：', err);
+				alert('取得交割銀行資料發生錯誤，請洽系統管理員！');
+			}
+		}
+
+		async function saveData(){
+			var fatcaOption = $("input[name='fatcaOption']:checked").val() || "";
+			answerJsonContent.customerData.fatcaOption = fatcaOption;
+
+			// 電子交易密碼補發
+			if ($electronicPasswordArea.length > 0) {
+				const internetValue = $("input[name='internetPasswordOption']:checked").val();
+				const voiceValue = $("#voicePassword").is(":checked") ? $("#voicePassword").val() : '';
+
+				answerJsonContent.electronicPassword_90 = answerJsonContent.electronicPassword_90 || {}; // 如果沒有該物件，執行初始化
+				answerJsonContent.electronicPassword_90.internetPassword = internetValue ?? '';
+				answerJsonContent.electronicPassword_90.voicePassword = voiceValue;
+			}else{
+				answerJsonContent.electronicPassword_90 = null;
+			}
+
+			// 款項劃撥帳號
+			if ($transferAccountArea.length > 0) {
+				const bankCode = $transferAccountArea.find("#bankInput").attr("data-key"); // 資料會異動，.data()會緩存不使用
+				const bankName = $transferAccountArea.find("#bankInput").attr("data-value"); // 資料會異動，.data()會緩存不使用
+				const bankAccount = $transferAccountArea.find("#bankAccount").val();
+
+				answerJsonContent.transferAccount_16 = answerJsonContent.transferAccount_16 || {}; // 如果沒有該物件，執行初始化
+				answerJsonContent.transferAccount_16.bankCode = bankCode;
+				answerJsonContent.transferAccount_16.bankName = bankName;
+				answerJsonContent.transferAccount_16.bankAccount = bankAccount;
+			}else{
+				answerJsonContent.transferAccount_16 = null;
+			}
+
+
+			// 更新answerJsonContent
+			answerJsonContent.phone_07 = isPhoneExists ? {
+				...(answerJsonContent.phone_07 || {}), // 如果沒有該物件，執行初始化
+				sTBasicAreaCode: $('#sTBasicAreaCode').val()?.trim(),
+				sTBasicPhone: $('#sTBasicPhone').val()?.trim(),
+				sTCompanyAreaCode: $('#sTCompanyAreaCode').val()?.trim(),
+				sTCompanyPhone: $('#sTCompanyPhone').val()?.trim(),
+				sTOtherAreaCode: $('#sTOtherAreaCode').val()?.trim(),
+				sTOtherPhone: $('#sTOtherPhone').val()?.trim(),
+				fSBasicAreaCode: $('#fSBasicAreaCode').val()?.trim(),
+				fSBasicPhone: $('#fSBasicPhone').val()?.trim(),
+
+			} : null;
+
+			answerJsonContent.mobile_18 = isMobileExists ? {
+				...(answerJsonContent.mobile_18 || {}), // 如果沒有該物件，執行初始化
+				sTMobile: $('#sTMobile').val()?.trim(),
+				fSMobile: $('#fSMobile').val()?.trim()
+			} : null;
+
+			answerJsonContent.mailingAddress_10 = isMailingExists ? {
+				...(answerJsonContent.mailingAddress_10 || {}), // 如果沒有該物件，執行初始化
+				sTPostalCode: $('#sTMailingPostalCode').val()?.trim(),
+				sTAddress: $('#sTMailingAddress').val()?.trim(),
+				fSPostalCode: $('#fSMailingPostalCode').val()?.trim(),
+				fSAddress: $('#fSMailingAddress').val()?.trim()
+			} : null;
+
+			answerJsonContent.permanentAddress_09 = isPermanentExists ? {
+				...(answerJsonContent.permanentAddress_09 || {}), // 如果沒有該物件，執行初始化
+				postalCode: $('#permanentPostalCode').val()?.trim(),
+				address: $('#permanentAddress').val()?.trim()
+			} : null;
+
+			answerJsonContent.email_19 = isEmailExists ? {
+				...(answerJsonContent.email_19 || {}), // 如果沒有該物件，執行初始化
+				sTEmail: $('#sTEmail').val()?.trim(),
+				fSEmail: $('#fSEmail').val()?.trim(),
+				changeEBill: $('input[name="changeEBillOption"]:checked').val() || null
+			} : null;
+
+			answerJsonContent.contact_CT = isContactExists ? {
+				...(answerJsonContent.contact_CT || {}), // 如果沒有該物件，執行初始化
+				sTName: $('#sTName').val()?.trim(),
+				sTPhone: $('#sTPhone').val()?.trim(),
+				fSName: $('#fSName').val()?.trim(),
+				fSPhone: $('#fSPhone').val()?.trim()
+			} : null;
+
+			await EFormScript.saveEFormAnswer(model.ecEform.formNo, JSON.stringify(answerJsonContent), eFormSubFormAnswerDtos, signData);
+
+			return true;
+		}
+
+		// 客戶填寫完確認送出事件 (從申請頁面進入，會先進入客戶填寫，送出後才到經辦填寫)
+		async function applyConfirm(){
+
+			// 電子交易密碼補發
+			if ($electronicPasswordArea.length > 0) {
+				const isAnyChecked = $("input[name='internetPasswordOption']:checked").length > 0 || $("#voicePassword").is(":checked");
+
+				if (!isAnyChecked) {
+					$("#electronicPasswordDanger").removeClass("d-none");
+					layoutPopup.init().paramer({title: '提示訊息',html: '<div>電子交易密碼補發未勾選任何項目！</div>',showCancel: false}).show();
+					return false;
+				}
+			}
+
+			// 款項劃撥帳號檢查
+			if ($transferAccountArea.length > 0) {
+				const bankCode = $transferAccountArea.find("#bankInput").attr("data-key"); // 資料會異動，.data()會緩存不使用
+				const bankAccount = $transferAccountArea.find("#bankAccount").val();
+				if(!bankCode){
+					$transferAccountArea.find("#bankInput").addClass("is-invalid");
+					layoutPopup.init().paramer({title: '提示訊息',html: '<div>請選擇交割銀行！</div>',showCancel: false}).show();
+					$('#customTabCarousel_16').click();
+					return false;
+				}
+
+				if(!bankAccount){
+					$transferAccountArea.find("#bankAccount").addClass("is-invalid");
+					layoutPopup.init().paramer({title: '提示訊息',html: '<div>請輸入銀行帳號！</div>',showCancel: false}).show();
+					$('#customTabCarousel_16').click();
+					return false;
+				}
+
+				const reg1 = /^\d{1,16}$/; // 匹配小於 16 碼的數字帳號
+				const reg2 = /^0+$/; // 全部輸入 0
+				if(!reg1.test(bankAccount) || reg2.test(bankAccount)){
+					$transferAccountArea.find("#bankAccount").addClass("is-invalid");
+					layoutPopup.init().paramer({title: '提示訊息',html: '<div>請輸入正確銀行帳號！</div>',showCancel: false}).show();
+					$('#customTabCarousel_16').click();
+					return false;
+				}
+
+				// 如果銀行代碼為永豐 807
+				if(/^807/.test(bankCode)){
+					// 帳號開頭不可為 341 分戶帳
+					if(/^341/.test(bankAccount)){
+						$transferAccountArea.find("#bankAccount").addClass("is-invalid");
+						layoutPopup.init().paramer({title: '提示訊息',html: '<div>銀行帳號不可為分戶帳！</div>',showCancel: false}).show();
+						$('#customTabCarousel_16').click();
+						return false;
+					}
+
+					// 必需為 14 碼帳號
+					if (bankAccount.length !== 14){
+						$transferAccountArea.find("#bankAccount").addClass("is-invalid");
+						layoutPopup.init().paramer({title: '提示訊息',html: '<div>永豐銀行請輸入14碼銀行帳號！</div>',showCancel: false}).show();
+						$('#customTabCarousel_16').click();
+						return false;
+					}
+				}
+			}
+			// 電話號碼
+			if(isPhoneExists){
+
+			}
+
+			// 檢查是否有選擇 FATCA 選項，以及是否為選項值 2
+			const selectedFatcaOption = $("input[name='fatcaOption']:checked").val(); // 獲取選擇的 radio 值
+			if (!selectedFatcaOption) {
+				$("#fatcaDanger").removeClass("d-none");
+				$("#fatcaTitle").addClass("text-danger");
+				layoutPopup.init().paramer({title: '提示訊息',html: '<div>請選擇 FATCA 選項！</div>',showCancel: false}).show();
+				return false;
+			}
+
+			if (selectedFatcaOption == "2") {
+				const fatcaImgs = fatcaAndCrsObj.getImgStorage();
+				// 檢查圖片是否已上傳
+				if(!fatcaImgs || fatcaImgs.length < 1){
+					$('#btnUploadFatcaAndCrs').removeClass('btn-success').addClass('btn-danger'); // 上傳按鈕圖片改為danger
+					$("#uploadFatcaAndCrsDanger").removeClass("d-none");
+					$("#fatcaOption2").addClass("is-invalid");
+					layoutPopup.init().paramer({title: '提示訊息',html: '<div>請上傳 FATCA 暨 CRS 相關文件！</div>',showCancel: false}).show();
+					return false;
+				}
+			}
+
+			const hasCustomerSignature = $("#divsign0 img.imgsign").attr("src") != null && $("#divsign0 img.imgsign").attr("src") !== "";
+			if(!hasCustomerSignature) {
+				layoutPopup.init().paramer({title: '提示訊息',html: '<div>請完成簽名！</div>',showCancel: false}).show();
+				return false;
+			}
+
+			layoutPopup.init().paramer({ content: "是否確定送出？" }).show(async () => {
+				UserLogScript.operationBehaviorLog(`${this.pageTitle}-確認送出(提示訊息)-點擊確認按鈕`, this.formNo);
+				layoutLoading.show();
+				try {
+					const isSaved = await saveData();
+					if(isSaved){
+						const url = `@Url.Action(nextPage.Action, nextPage.Controller)/${model.ecEform.formNo}?returnUrl=${encodeURIComponent(window.location.href)}&acsn=${acsn}`;
+						location.replace(url);
+					}
+
+					layoutPopup.close();
+				} catch (err) {
+					console.error(err);
+					let errorMessage = "系統發生未知錯誤，請洽系統管理員！";
+					if (err.responseJSON && err.responseJSON.message) {
+						// 後端返回的錯誤訊息
+						errorMessage = `伺服器錯誤：${err.responseJSON.message}`;
+					} else if (err.message) {
+						// JavaScript 的錯誤訊息
+						errorMessage = `錯誤：${err.message}`;
+					}
+
+					layoutPopup.init().paramer({ title: "送出失敗", html: `<div>${errorMessage}！<div>`, showCancel: false }).show();
+				} finally {
+					layoutLoading.close();
+				}
+			});
+		}
+
+		$('input').on('input', function () {
+			const field = $(this);
+			const value = field.val().trim();
+
+			// 只要使用者開始輸入內容，就移除相關警告樣式
+			if (value !== '') {
+				field.removeClass('is-invalid'); // 移除紅色警示
+
+				// FATCA 暨 CRS 稅務居民身分聲明
+				if (field.attr('name') === 'fatcaOption') {
+					$("#fatcaDanger").addClass("d-none"); // 隱藏警示訊息
+					$("#fatcaTitle").removeClass("text-danger"); // 移除警示的紅色文字樣式
+				}
+
+				// 密碼補發
+				if (field.attr('name') === 'internetPasswordOption' || field.attr('id') === 'voicePassword'){
+					$("#electronicPasswordDanger").addClass("d-none");
+				}
+			}
+		});
+
+		const fatcaAndCrsObj = UploadImage().init("fatcaAndCrsPhotos");
+
+		const fatcaAndCrsUploadImg = UploadImgDefaultScript(8,fatcaAndCrsObj);
+		fatcaAndCrsUploadImg.removeDanger = () => {
+			$('#btnUploadFatcaAndCrs').removeClass('btn-danger').addClass('btn-success'); // 上傳按鈕圖片改為success
+			$("#uploadFatcaAndCrsDanger").addClass("d-none"); // 隱藏警示訊息
+			$("#fatcaOption2").removeClass("is-invalid"); // 移除警示的紅色文字樣式
+		};
+		fatcaAndCrsUploadImg.addDanger = () => {
+			$('#btnUploadFatcaAndCrs').removeClass('btn-success').addClass('btn-danger'); // 上傳按鈕圖片改為danger
+		};
+
+		fatcaAndCrsObj.setInsImg(fatcaAndCrsUploadImg.insImg)
+			.setDelImg(fatcaAndCrsUploadImg.removePicture)
+			.setUpdImg(fatcaAndCrsUploadImg.updateBase64ImgAfterRotation);
+
+		const rocFatcaAndCrsObj = UploadImage().init("rocFatcaAndCrsPhotos");
+
+		const rocFatcaAndCrsUploadImg = UploadImgDefaultScript(8001,rocFatcaAndCrsObj);
+
+		rocFatcaAndCrsObj.setInsImg(rocFatcaAndCrsUploadImg.insImg)
+			.setDelImg(rocFatcaAndCrsUploadImg.removePicture)
+			.setUpdImg(rocFatcaAndCrsUploadImg.updateBase64ImgAfterRotation);
+	</script>
+}
