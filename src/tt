@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Tab 驗證測試</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        .TabsBar {
+            transition: all .2s;
+        }
+
+        .TabsBar.tab-valid {
+            background-color: #198754 !important;
+            border-color: #198754 !important;
+            color: white !important;
+        }
+
+        .TabsBar.tab-invalid {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+            color: white !important;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container mt-4">
+
+
+    <div id="customTabCarousel_Forms"
+         class="w-100 my-3 carousel slide"
+         data-bs-touch="false"
+         data-bs-interval="false">
+
+
+        <!-- Tab -->
+
+        <div class="d-flex flex-nowrap overflow-auto user-select-none mb-3 pb-2 border-bottom">
+
+
+            <button type="button"
+                    id="customTabCarousel_96"
+                    class="btn btn-danger shadow-sm me-2 rounded-pill text-nowrap fw-medium px-4 flex-shrink-0 TabsBar"
+                    data-bs-target="#customTabCarousel_Forms"
+                    data-fnkey="BAS001_96"
+                    data-bs-slide-to="0">
+
+                線上簽署
+
+            </button>
+
+
+            <button type="button"
+                    id="customTabCarousel_16"
+                    class="btn btn-danger me-2 rounded-pill text-nowrap fw-medium px-4 flex-shrink-0 TabsBar"
+                    data-bs-target="#customTabCarousel_Forms"
+                    data-fnkey="BAS001_16"
+                    data-bs-slide-to="1">
+
+                款項劃撥帳號
+
+            </button>
+
+
+            <button type="button"
+                    id="customTabCarousel_07"
+                    class="btn btn-danger me-2 rounded-pill text-nowrap fw-medium px-4 flex-shrink-0 TabsBar"
+                    data-bs-target="#customTabCarousel_Forms"
+                    data-fnkey="BAS001_07"
+                    data-bs-slide-to="2">
+
+                電話號碼
+
+            </button>
+
+
+        </div>
+
+
+        <!-- Content -->
+
+        <div class="carousel-inner overflow-visible">
+
+
+            <!-- Tab A -->
+
+            <div class="carousel-item active">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-body">
+
+
+                        <h5>
+                            Tab A - 線上簽署
+                        </h5>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                姓名
+                            </label>
+
+                            <input type="text"
+                                   id="name"
+                                   class="form-control required"
+                                   placeholder="請輸入姓名">
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                身分證號
+                            </label>
+
+                            <input type="text"
+                                   id="idNumber"
+                                   class="form-control required"
+                                   placeholder="請輸入身分證號">
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Tab B -->
+
+            <div class="carousel-item">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-body">
+
+
+                        <h5>
+                            Tab B - 款項劃撥帳號
+                        </h5>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                銀行代碼
+                            </label>
+
+                            <input type="text"
+                                   id="bankCode"
+                                   class="form-control required"
+                                   placeholder="請輸入銀行代碼">
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                帳號
+                            </label>
+
+                            <input type="text"
+                                   id="account"
+                                   class="form-control required"
+                                   placeholder="請輸入帳號">
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Tab C -->
+
+            <div class="carousel-item">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-body">
+
+
+                        <h5>
+                            Tab C - 電話號碼
+                        </h5>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                電話
+                            </label>
+
+                            <input type="text"
+                                   id="phone"
+                                   class="form-control required"
+                                   placeholder="請輸入電話">
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+
+
+    const validators = {
+
+        'BAS001_96':
+            typeof validate96 === "function"
+                ? validate96
+                : null,
+
+        'BAS001_16':
+            typeof validate16 === "function"
+                ? validate16
+                : null,
+
+        'BAS001_07':
+            typeof validate07 === "function"
+                ? validate07
+                : null
+
+    };
+
+
+    function validate96() {
+
+        console.log('執行 validate96()');
+
+        var name = $('#name').val().trim();
+
+        var idNumber = $('#idNumber').val().trim();
+
+
+        if (!name) {
+
+            alert('Tab A：請輸入姓名');
+
+            $('#name').focus();
+
+            return false;
+
+        }
+
+
+        if (!idNumber) {
+
+            alert('Tab A：請輸入身分證號');
+
+            $('#idNumber').focus();
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    function validate16() {
+
+        console.log('執行 validate16()');
+
+        var bankCode = $('#bankCode').val().trim();
+
+        var account = $('#account').val().trim();
+
+
+        if (!bankCode) {
+
+            alert('Tab B：請輸入銀行代碼');
+
+            $('#bankCode').focus();
+
+            return false;
+
+        }
+
+
+        if (!account) {
+
+            alert('Tab B：請輸入帳號');
+
+            $('#account').focus();
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    function validate07() {
+
+        console.log('執行 validate07()');
+
+        var phone = $('#phone').val().trim();
+
+
+        if (!phone) {
+
+            alert('Tab C：請輸入電話');
+
+            $('#phone').focus();
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    $(function () {
+
+
+        var $carousel =
+            $('#customTabCarousel_Forms');
+
+
+        var $items =
+            $carousel.find('.carousel-item');
+
+
+        var $tabs =
+            $carousel.find('.TabsBar');
+
+
+        function validateTab(index) {
+
+
+            var $tab =
+                $tabs.eq(index);
+
+
+            if (!$tab.length) {
+
+                return true;
+
+            }
+
+
+            var fnKey =
+                $tab.data('fnkey');
+
+
+            var validator =
+                validators[fnKey];
+
+
+            console.log(
+                '目前離開 Tab:',
+                fnKey
+            );
+
+
+            if (typeof validator !== 'function') {
+
+                return true;
+
+            }
+
+
+            var result =
+                validator();
+
+
+            if (result === true) {
+
+                $tab
+                    .removeClass('tab-invalid')
+                    .addClass('tab-valid');
+
+            }
+            else {
+
+                $tab
+                    .removeClass('tab-valid')
+                    .addClass('tab-invalid');
+
+            }
+
+
+            return result;
+
+        }
+
+
+        function updateTabStyles(activeIndex) {
+
+
+            $tabs.each(function (index) {
+
+
+                var $tab =
+                    $(this);
+
+
+                $tab.removeClass(
+                    'shadow-sm'
+                );
+
+
+                if (index === activeIndex) {
+
+                    $tab.addClass(
+                        'shadow-sm'
+                    );
+
+                }
+
+
+            });
+
+        }
+
+
+        $carousel.on(
+            'slide.bs.carousel',
+            function (e) {
+
+
+                var fromIndex =
+                    e.from;
+
+
+                if (fromIndex === undefined) {
+
+                    return;
+
+                }
+
+
+                console.log(
+                    '準備從 Tab',
+                    fromIndex,
+                    '切換'
+                );
+
+
+                var result =
+                    validateTab(fromIndex);
+
+
+                if (result === false) {
+
+
+                    console.log(
+                        '驗證失敗，取消切換'
+                    );
+
+
+                    e.preventDefault();
+
+
+                    return false;
+
+                }
+
+
+                console.log(
+                    '驗證成功，允許切換'
+                );
+
+
+            }
+        );
+
+
+        $carousel.on(
+            'slid.bs.carousel',
+            function (e) {
+
+
+                var activeIndex =
+                    e.to !== undefined
+                        ? e.to
+                        : $items.filter('.active').index();
+
+
+                console.log(
+                    '目前 Tab:',
+                    activeIndex
+                );
+
+
+                $carousel
+                    .find('.carousel-item')
+                    .css('transform', '');
+
+
+                updateTabStyles(
+                    activeIndex
+                );
+
+
+            }
+        );
+
+
+        $carousel.on(
+            'input change',
+            '.required',
+            function () {
+
+
+                var activeIndex =
+                    $items.filter('.active').index();
+
+
+                if (activeIndex !== -1) {
+
+                    updateTabStyles(
+                        activeIndex
+                    );
+
+                }
+
+
+            }
+        );
+
+
+        updateTabStyles(0);
+
+
+    });
+
+
+</script>
+
+
+</body>
+
+</html>
